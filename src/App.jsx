@@ -8,6 +8,8 @@ import BookingSuccess from "./pages/BookingSuccess.jsx";
 import MyBookings from "./pages/MyBookings.jsx";
 import Profile from "./pages/Profile.jsx";
 import LiveTracking from "./pages/LiveTracking.jsx";
+import TechAccept from "./pages/TechAccept.jsx";
+import TechDecline from "./pages/TechDecline.jsx";
 
 /* ================= AUTH ================= */
 import PhoneLogin from "./pages/PhoneLogin.jsx";
@@ -119,6 +121,8 @@ export default function App() {
        <Route path="/washing-machine"  element={<Washing/>}/>
        <Route path="/refrigerator" element={<Frigde/>}/>
      { /*<Route path="/clean" element={<CleaningPestControl />} />*/}
+     <Route path="/tech/accept/:bookingId" element={<TechAccept />} />
+     <Route path="/tech/decline/:bookingId" element={<TechDecline />} />
     </Routes>
   );
 }
