@@ -7,15 +7,21 @@ import { getAnalytics } from "firebase/analytics";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDIJz8QWtOHoDFu5SAqp_uHPq_svXyJY7U",
-  authDomain: "qs1-pilot.firebaseapp.com",
-  projectId: "qs1-pilot",
-  storageBucket: "qs1-pilot.firebasestorage.app",
-  messagingSenderId: "476422085482",
-  appId: "1:476422085482:web:aaa5866deeff2c43486313",
-  measurementId: "G-HJ6B0XPD2M"
+  apiKey: "AIzaSyDdwa6VCsJUqaxAjsZydVW52A9dntLMlxs",
+  authDomain: "quickseva-c0c49.firebaseapp.com",
+  projectId: "quickseva-c0c49",
+  storageBucket: "quickseva-c0c49.firebasestorage.app",
+  messagingSenderId: "575202046802",
+  appId: "1:575202046802:web:ea429919908bbf5ddac08b",
+  measurementId: "G-DJRSQEGY5L"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+
+// ✅ EXPORT db (THIS WAS MISSING)
+export const db = getFirestore(app);
+
+// (optional, but safe if you already use auth)
+export const auth = getAuth(app);
