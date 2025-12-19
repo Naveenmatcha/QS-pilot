@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+// 🔥 Firebase imports
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../firebase";
+
 export default function Booking() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -12,7 +16,7 @@ export default function Booking() {
   const [date, setDate] = useState("");
   const [hour, setHour] = useState("");
   const [minute, setMinute] = useState("");
-  const [period, setPeriod] = useState(""); // AM / PM
+  const [period, setPeriod] = useState("");
   const [address, setAddress] = useState("");
 
   /* ================= MOBILE-SAFE CONTEXT LOAD ================= */
@@ -41,7 +45,7 @@ export default function Booking() {
 
   const { service, subService, price } = context;
 
-  const submitBooking = () => {
+  const submitBooking = async () => {
     if (!date || !hour || !minute || !period || !address) {
       alert("Please fill all details");
       return;
@@ -50,7 +54,6 @@ export default function Booking() {
     const time12 = `${hour}:${minute} ${period}`;
 
     const booking = {
-      id: Date.now().toString(),
       userId: user?.uid || "guest",
       service,
       subService,
@@ -63,18 +66,21 @@ export default function Booking() {
       createdAt: new Date().toISOString(),
     };
 
-    const all = JSON.parse(localStorage.getItem("bookings") || "[]");
-    localStorage.setItem("bookings", JSON.stringify([...all, booking]));
+    try {
+      // 🔥 SAVE TO FIREBASE (shared)
+      const docRef = await addDoc(collection(db, "bookings"), booking);
 
-    navigate("/booking-success", {
-      state: { bookingId: booking.id },
-    });
+      navigate("/booking-success", {
+        state: { bookingId: docRef.id },
+      });
+    } catch (error) {
+      console.error("Error saving booking:", error);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   return (
     <div className="p-4 pb-28 bg-gray-50 min-h-screen">
-
-     
 
       {/* 🧾 SERVICE SUMMARY WITH PRICE */}
       <div className="mb-6 p-4 rounded-xl border bg-white shadow-sm">
@@ -102,7 +108,7 @@ export default function Booking() {
         className="w-full p-3 mb-4 border rounded bg-white"
       />
 
-      {/* ⏰ TIME (12-HOUR FORMAT) */}
+      {/* ⏰ TIME */}
       <label className="text-sm text-gray-600">Select Time</label>
       <div className="flex gap-2 mb-4">
         <select
