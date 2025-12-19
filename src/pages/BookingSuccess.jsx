@@ -5,8 +5,8 @@ export default function BookingSuccess() {
   const nav = useNavigate();
 
   // ✅ QS OFFICIAL SUPPORT DETAILS (change anytime)
-  const SUPPORT_PHONE = "919876543210"; // +91XXXXXXXXXX
-  const WHATSAPP_NUMBER = "919876543210";
+  const SUPPORT_PHONE = "7661045308"; // +91XXXXXXXXXX
+  const WHATSAPP_NUMBER = "7661045308";
 
   const whatsappMessage = encodeURIComponent(
     "Hello QuickSeva 👋 I just booked a service and need help regarding my booking."

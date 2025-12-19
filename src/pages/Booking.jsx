@@ -67,7 +67,6 @@ export default function Booking() {
     };
 
     try {
-      // 🔥 SAVE TO FIREBASE (shared)
       const docRef = await addDoc(collection(db, "bookings"), booking);
 
       navigate("/booking-success", {
@@ -81,7 +80,6 @@ export default function Booking() {
 
   return (
     <div className="p-4 pb-28 bg-gray-50 min-h-screen">
-
       {/* 🧾 SERVICE SUMMARY WITH PRICE */}
       <div className="mb-6 p-4 rounded-xl border bg-white shadow-sm">
         <div className="flex justify-between items-center">

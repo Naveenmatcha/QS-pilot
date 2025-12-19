@@ -9,3 +9,10 @@
 body {
   background-color: #F5F8FF;
 }
+
+/* Improve text-size-adjust support across browsers (prevents unexpected font scaling) */
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
