@@ -1,43 +1,60 @@
 import React, { useEffect, useState } from "react";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  query,
+  orderBy,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../firebase";
 
-/* ✅ ADMIN DASHBOARD (Firestore bookings) */
 export default function AdminDashboardLocal() {
   const [bookings, setBookings] = useState([]);
   const [technicians, setTechnicians] = useState([]);
 
   useEffect(() => {
-    // 🔥 READ BOOKINGS FROM FIRESTORE (LIVE)
+    // 🔥 LIVE BOOKINGS FROM FIRESTORE
     const q = query(
       collection(db, "bookings"),
       orderBy("createdAt", "desc")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const list = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      const list = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
       }));
       setBookings(list);
     });
 
-    // ✅ LOCAL TECHNICIANS (unchanged)
+    // ✅ LOAD LOCAL TECHNICIANS
     const techs = JSON.parse(localStorage.getItem("technicians") || "[]");
     setTechnicians(techs);
 
     return () => unsubscribe();
   }, []);
 
-  /* ❗ KEEP ASSIGN FUNCTION AS-IS (local only for now) */
-  const assignTechnician = (bookingId, technician) => {
-    alert(
-      "Status update will be connected to Firestore in the next step"
-    );
+  /* ✅ ASSIGN TECHNICIAN → UPDATE FIRESTORE (SAFE) */
+  const assignTechnician = async (bookingId, technician) => {
+    try {
+      const ref = doc(db, "bookings", bookingId);
+
+      await updateDoc(ref, {
+        status: "Assigned",
+        technicianId: technician.id,
+        technicianName: technician.name,
+        technicianRating: technician.rating ?? 0, // 🔧 FIX
+        assignedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error assigning technician:", error);
+      alert("Failed to assign technician");
+    }
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 bg-gray-50 min-h-screen">
       <h1 className="text-xl font-bold mb-4">Admin Dashboard</h1>
 
       {bookings.length === 0 ? (
@@ -55,19 +72,14 @@ export default function AdminDashboardLocal() {
               📅 {b.date} · ⏰ {b.time}
             </div>
 
-            <div className="text-sm mt-1">
-              📍 {b.address}
-            </div>
-
-            <div className="text-sm mt-1">
-              📞 {b.phone}
-            </div>
+            <div className="text-sm mt-1">📍 {b.address}</div>
+            <div className="text-sm mt-1">📞 {b.phone}</div>
 
             <div className="text-sm mt-2">
               Status: <strong>{b.status}</strong>
             </div>
 
-            {/* ✅ TECH ASSIGN DROPDOWN (UI SAME, logic later) */}
+            {/* ✅ ASSIGN TECHNICIAN */}
             {b.status === "Pending" && technicians.length > 0 && (
               <div className="mt-3">
                 <select
@@ -82,14 +94,14 @@ export default function AdminDashboardLocal() {
                   <option value="">Assign Technician</option>
                   {technicians.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.name} ⭐ {t.rating}
+                      {t.name} ⭐ {t.rating ?? 0}
                     </option>
                   ))}
                 </select>
               </div>
             )}
 
-            {/* ✅ SHOW ASSIGNED TECH (if exists) */}
+            {/* ✅ SHOW ASSIGNED TECH */}
             {b.technicianName && (
               <div className="mt-2 text-sm bg-gray-100 p-2 rounded">
                 👨‍🔧 {b.technicianName} · ⭐ {b.technicianRating}
