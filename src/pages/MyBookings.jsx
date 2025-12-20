@@ -2,6 +2,18 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+/* ✅ New Firebase imports */
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "../firebase";
+
 export default function MyBookings() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -13,13 +25,25 @@ export default function MyBookings() {
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
 
-  /* ================= LOAD BOOKINGS ================= */
+  /* ================= LOAD BOOKINGS FROM FIREBASE ================= */
   useEffect(() => {
     if (!user) return;
 
-    const all = JSON.parse(localStorage.getItem("bookings") || "[]");
-    const my = all.filter((b) => b.userId === user.uid);
-    setBookings(my.reverse());
+    const q = query(
+      collection(db, "bookings"),
+      where("userId", "==", user.uid),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsub = onSnapshot(q, (snap) => {
+      const list = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
+      setBookings(list);
+    });
+
+    return () => unsub();
   }, [user?.uid]);
 
   /* ================= AUTO REVIEW ================= */
@@ -54,22 +78,24 @@ export default function MyBookings() {
   }, [filter, bookings]);
 
   /* ================= REVIEW ================= */
-  const submitReview = () => {
+  const submitReview = async () => {
     if (!rating) return alert("Please rate");
 
-    const all = JSON.parse(localStorage.getItem("bookings") || "[]");
+    try {
+      const ref = doc(db, "bookings", reviewBooking.id);
 
-    const updated = all.map((b) =>
-      b.id === reviewBooking.id
-        ? { ...b, proRating: rating, proReview: review }
-        : b
-    );
+      await updateDoc(ref, {
+        proRating: rating,
+        proReview: review,
+      });
 
-    localStorage.setItem("bookings", JSON.stringify(updated));
-    setBookings(updated.filter((b) => b.userId === user.uid).reverse());
-    setReviewBooking(null);
-    setRating(0);
-    setReview("");
+      setReviewBooking(null);
+      setRating(0);
+      setReview("");
+    } catch (err) {
+      console.error("Review update failed", err);
+      alert("Failed to submit review");
+    }
   };
 
   return (
@@ -123,7 +149,6 @@ export default function MyBookings() {
             </p>
             <p className="text-sm">📍 {b.address}</p>
 
-            {/* 📍 TRACK BUTTON (FIXED) */}
             {b.status === "Assigned" && (
               <button
                 onClick={() => navigate(`/track/${b.id}`)}
