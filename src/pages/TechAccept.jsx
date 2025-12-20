@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
-
+import React from "react";
 export default function TechAccept() {
   const { bookingId } = useParams();
   const [status, setStatus] = useState("processing");

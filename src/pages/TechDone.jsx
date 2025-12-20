@@ -1,4 +1,5 @@
 // src/pages/TechDone.jsx
+import React from "react";
 import { useParams } from "react-router-dom";
 import { doc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
