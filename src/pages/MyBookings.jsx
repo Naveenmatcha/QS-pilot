@@ -31,7 +31,7 @@ export default function MyBookings() {
 
     const q = query(
       collection(db, "bookings"),
-      where("userId", "==", user.uid),
+      where("phone", "==", user.uid),
       orderBy("createdAt", "desc")
     );
 
