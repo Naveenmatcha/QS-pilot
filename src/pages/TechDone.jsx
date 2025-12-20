@@ -1,20 +1,33 @@
-// src/pages/TechDone.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { doc, updateDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
 import { db } from "../firebase";
 
 export default function TechDone() {
   const { bookingId } = useParams();
-  const [done, setDone] = useState(false);
+  const [status, setStatus] = useState("processing");
 
   useEffect(() => {
-    updateDoc(doc(db, "bookings", bookingId), {
-      status: "Completed",
-      completedAt: new Date().toISOString(),
-    }).then(() => setDone(true));
+    const complete = async () => {
+      try {
+        await updateDoc(doc(db, "bookings", bookingId), {
+          status: "Completed",
+          completedAt: new Date().toISOString(),
+        });
+        setStatus("done");
+      } catch {
+        setStatus("error");
+      }
+    };
+
+    complete();
   }, [bookingId]);
 
-  return <div className="p-6 text-center">{done ? "🎉 Job Completed" : "Updating..."}</div>;
+  if (status === "processing")
+    return <div className="p-6 text-center">Updating…</div>;
+
+  if (status === "error")
+    return <div className="p-6 text-center text-red-600">Failed</div>;
+
+  return <div className="p-6 text-center">🎉 Job Completed</div>;
 }

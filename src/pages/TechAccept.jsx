@@ -2,29 +2,25 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import React from "react";
+
 export default function TechAccept() {
   const { bookingId } = useParams();
   const [status, setStatus] = useState("processing");
 
   useEffect(() => {
-    const acceptJob = async () => {
+    const accept = async () => {
       try {
-        const ref = doc(db, "bookings", bookingId);
-
-        await updateDoc(ref, {
+        await updateDoc(doc(db, "bookings", bookingId), {
           status: "Accepted",
           technicianResponseAt: new Date().toISOString(),
         });
-
-        setStatus("accepted");
-      } catch (err) {
-        console.error(err);
+        setStatus("done");
+      } catch (e) {
         setStatus("error");
       }
     };
 
-    acceptJob();
+    accept();
   }, [bookingId]);
 
   if (status === "processing")
@@ -37,10 +33,5 @@ export default function TechAccept() {
       </div>
     );
 
-  return (
-    <div className="p-6 text-center">
-      <h2 className="text-xl font-bold mb-2">✅ Job Accepted</h2>
-      <p>You can now proceed to the service location.</p>
-    </div>
-  );
+  return <div className="p-6 text-center">✅ Job Accepted</div>;
 }
