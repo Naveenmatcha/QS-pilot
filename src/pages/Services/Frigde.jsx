@@ -233,7 +233,7 @@ export default function Fridge() {
   const active = SERVICES[bannerIndex];
 
   const handleBook = (title, name, price) => {
-    navigate("/booking", {
+    navigate("/service-detail", {
       state: {
         service: "Fridge Repair",
         subService: `${title} - ${name}`,

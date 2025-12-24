@@ -184,13 +184,14 @@ export default function Washing() {
   const active = SERVICES[bannerIndex];
 
   const handleBook = (title, name) => {
-    navigate("/booking", {
-      state: {
-        service: "Washing Machine",
-        subService: `${title} - ${name}`,
-      },
-    });
-  };
+  navigate("/service-detail", {
+    state: {
+      service: "Washing Machine",
+      subService: `${title} - ${name}`,
+    },
+  });
+};
+
 
   return (
     <div className="p-4 pb-28 service-container">

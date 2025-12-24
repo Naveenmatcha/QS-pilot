@@ -238,7 +238,7 @@ export default function ApplianceServices() {
   const active = SERVICES[bannerIndex];
 
   const handleBook = (title, name) => {
-    navigate("/booking", {
+    navigate("/service-detail", {
       state: {
         service: "AC & Appliances",
         subService: `${title} - ${name}`,

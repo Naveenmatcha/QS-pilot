@@ -209,7 +209,7 @@ export default function Plumber() {
                   <button
                     className="px-4 py-2 h-fit mt-auto rounded-xl bg-qsBlue-500 text-white"
                     onClick={() =>
-                      navigate("/booking", {
+                      navigate("/service-detail", {
                         state: {
                           service: "Plumber",
                           subService: it.name,

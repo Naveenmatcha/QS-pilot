@@ -147,7 +147,7 @@ export default function CarpenterDetails() {
                   <button
                     className="px-4 py-2 rounded-xl bg-qsBlue-500 text-white"
                     onClick={() =>
-                      nav("/booking", {
+                      nav("/service-detail", {
                         state: {
                           service: "Carpenter",
                           subService: i2.name,
