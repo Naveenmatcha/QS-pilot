@@ -131,7 +131,7 @@ export default function Home() {
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-black/55" />
+         <div className="absolute inset-0 bg-black/55 pointer-events-none" />
         <div className="relative z-10 h-full flex flex-col justify-between p-4 text-white">
           <div>
             <h2 className="text-xl font-bold">{activeBanner.label}</h2>
@@ -140,13 +140,13 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="flex gap-2">
-            <a
-              href="tel:+7661045308"
-              className="px-4 py-2 bg-green-600 rounded-xl font-semibold"
-            >
-              📞 Call
-            </a>
+          <div className="flex gap-2 pointer-events-auto">
+      <a
+        href="tel:7661045308"
+        className="px-4 py-2 bg-green-600 rounded-xl font-semibold"
+      >
+        📞 Call
+      </a>
             <a
               href="https://wa.me/7661045308"
               target="_blank"

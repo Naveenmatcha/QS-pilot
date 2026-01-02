@@ -1,14 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import bannerElectrician from "../../assets/eletrican banner.png";
-
+import allfans from "../../assets/allfans.png";
 const SUBS_EP = [
   { id: "e1", label: "Switchboard Repair / Replacement", desc: "Fix or replace damaged switchboard safely", price: "₹99", tag: "Bestseller", time: "20–30 mins", warranty: "30 Days" },
   { id: "e2", label: "Switch / Socket Repair / Replacement", desc: "Repair broken switches and loose sockets", price: "₹149", tag: "Popular", time: "20–40 mins", warranty: "30 Days" },
   { id: "e3", label: "New Switch Box Installation", desc: "Install a brand new switch box securely", price: "₹149", time: "25–40 mins", warranty: "30 Days" },
 
   { id: "e4", label: "Fan Repair", desc: "Fix fan not working, noise or slow speed", price: "₹149", tag: "Trending", time: "25–45 mins", warranty: "30 Days" },
-  { id: "e5", label: "Exhaust / Pedestal / Tower Fan Installation", desc: "Professional fan fitting with neat wiring", price: "₹99", time: "20–30 mins", warranty: "30 Days" },
+  { id: "e5", label: "Exhaust / Pedestal / Tower Fan Installation", desc: "Professional fan fitting with neat wiring", price: "₹99", time: "20–30 mins", warranty: "30 Days" ,image: allfans},
   { id: "e6", label: "Fan Regulator Replacement", desc: "Replace faulty fan speed regulator", price: "₹79", time: "15–20 mins", warranty: "30 Days" },
   { id: "e21", label: "Karban Airzone Fan Installation", desc: "Install premium Airzone fan safely", price: "₹399", time: "30–45 mins", warranty: "30 Days" },
 
@@ -214,7 +214,7 @@ export default function ElectricianPlumber() {
                 {items.map((s) => (
                   <div
                     key={s.id}
-                    className="service-card bg-white p-3 rounded-2xl shadow border flex flex-col sm:flex-row justify-between gap-3"
+                    className="service-card bg-white p-3 rounded-2xl shadow border flex flex-col md:flex-row gap-3"
                   >
                     <div>
                       <div className="flex items-center gap-2">
@@ -226,6 +226,28 @@ export default function ElectricianPlumber() {
                           </span>
                         )}
                       </div>
+                      {s.image && (
+              <img
+                src={s.image}
+                alt={s.label}
+                 className="
+    w-full
+    sm:w-full
+    md:w-36
+    lg:w-40
+    h-auto
+        max-h-48
+        object-contain
+    sm:h-36
+    md:h-28
+    lg:h-32
+    rounded-xl
+    object-cover
+    bg-gray-100
+  "
+                loading="lazy"
+              />
+            )}
 
                       <p className="text-xs text-gray-500 mt-1">{s.desc}</p>
 
