@@ -34,6 +34,11 @@ export default function Home() {
 
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
+  const whatsappMessage = encodeURIComponent(
+  "Hi QuickSeva 👋 I want to book a service. Please assist me."
+);
+
+
   useEffect(() => {
     setTimeout(() => setLoading(false), 1200);
   }, []);
