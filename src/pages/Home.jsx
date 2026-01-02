@@ -153,13 +153,14 @@ export default function Home() {
         📞 Call
       </a>
             <a
-              href="https://wa.me/7661045308"
-              target="_blank"
-              rel="noreferrer"
-              className="px-4 py-2 bg-green-500 rounded-xl font-semibold"
-            >
-              💬 WhatsApp
-            </a>
+  href={`https://wa.me/7661045308?text=${whatsappMessage}`}
+  target="_blank"
+  rel="noreferrer"
+  className="px-4 py-2 bg-green-500 rounded-xl font-semibold"
+>
+  💬 WhatsApp
+</a>
+
           </div>
         </div>
       </div>
