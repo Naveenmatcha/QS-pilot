@@ -11,7 +11,7 @@ import karbanfan from"../../assets/Karban fan.png";
 import fancylight from "../../assets/Fancylight.png";
 import Blub from "../../assets/blub.png";
 import Tubelight from "../../assets/tubelight.png";
-import Cellinglight from  "../../assets/Cellinglight.png";
+import Cellinglight from  "../../assets/cellinglight.png";
 import Hanglight from "../../assets/hanginglight.png";
 import chandelier from"../../assets/chandler.png";
 import Internal from "../../assets/internal.png";
