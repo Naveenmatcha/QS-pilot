@@ -1,4 +1,7 @@
 {
+  "projects": {
+    "default": "quickseva-c0c49"
+  },
   "firestore": {
     "database": "(default)",
     "location": "nam5",

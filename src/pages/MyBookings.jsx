@@ -10,6 +10,7 @@ import {
   onSnapshot,
   doc,
   updateDoc,
+  addDoc,
 } from "firebase/firestore";
 import { db } from "../firebase";
 
@@ -23,6 +24,10 @@ export default function MyBookings() {
   const [reviewBooking, setReviewBooking] = useState(null);
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
+
+  const [complaintBooking, setComplaintBooking] = useState(null);
+  const [complaintText, setComplaintText] = useState("");
+  const [complaintCategory, setComplaintCategory] = useState("quality");
 
   const [cancelBooking, setCancelBooking] = useState(null);
   const [editBooking, setEditBooking] = useState(null);
@@ -103,6 +108,48 @@ export default function MyBookings() {
     }
   };
 
+  /* ================= SUBMIT COMPLAINT ================= */
+  const submitComplaint = async () => {
+    if (!complaintText.trim()) {
+      return alert("Please describe your complaint");
+    }
+
+    try {
+      // Save complaint to Firestore
+      await addDoc(collection(db, "complaints"), {
+        bookingId: complaintBooking.id,
+        userId: user?.uid,
+        userName: user?.name || "Guest",
+        phone: user?.phone,
+        category: complaintCategory,
+        description: complaintText,
+        bookingDetails: {
+          items: complaintBooking.items,
+          totalAmount: complaintBooking.totalAmount,
+          date: complaintBooking.date,
+          time: complaintBooking.time,
+          address: complaintBooking.address,
+        },
+        status: "Open",
+        createdAt: new Date().toISOString(),
+      });
+
+      // Also update booking to mark it has a complaint
+      await updateDoc(doc(db, "bookings", complaintBooking.id), {
+        hasComplaint: true,
+        complaintDate: new Date().toISOString(),
+      });
+
+      alert("✅ Your complaint has been registered!\n\nOur support team will contact you within 24 hours.");
+      setComplaintBooking(null);
+      setComplaintText("");
+      setComplaintCategory("quality");
+    } catch (err) {
+      alert("Could not submit complaint. Please try again.");
+      console.error(err);
+    }
+  };
+
   /* ================= CANCEL ================= */
   const cancelUserBooking = async () => {
     try {
@@ -126,7 +173,9 @@ export default function MyBookings() {
     setNewDate(booking.date || "");
 
     if (booking.time) {
-      const [timePart, period] = booking.time.split(" ");
+      const parts = booking.time.split(" ");
+      const period = parts[parts.length - 1]; // AM or PM
+      const timePart = parts.slice(0, -1).join(" "); // HH:mm
       const [h, m] = timePart.split(":");
       setNewTime({ hour: h || "", minute: m || "", period: period || "AM" });
     } else {
@@ -227,9 +276,37 @@ export default function MyBookings() {
             className="bg-white rounded-2xl shadow-sm border mb-4 p-4"
           >
             <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-semibold text-lg">{b.service}</h3>
-                <p className="text-gray-600 text-sm mt-0.5">{b.subService}</p>
+              <div className="flex-1">
+                {/* Show booked services/items */}
+                {b.items && Array.isArray(b.items) && b.items.length > 0 ? (
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">
+                      {b.items.length} Service{b.items.length > 1 ? 's' : ''}
+                    </h3>
+                    {b.items.map((item, idx) => (
+                      <div key={idx} className="text-sm mb-1.5 pb-1.5 border-b last:border-b-0">
+                        <p className="font-medium text-gray-900">
+                          {item.label || 'Service'}
+                        </p>
+                        <p className="text-gray-600">
+                          ₹{item.price || 0} × {item.qty || 1} = ₹{((item.price || 0) * (item.qty || 1))}
+                        </p>
+                      </div>
+                    ))}
+                    {b.totalAmount && (
+                      <p className="font-semibold text-gray-900 mt-2">
+                        Total: ₹{b.totalAmount}
+                      </p>
+                    )}
+                  </div>
+                ) : b.service ? (
+                  <div>
+                    <h3 className="font-semibold text-lg">{b.service}</h3>
+                    <p className="text-gray-600 text-sm mt-0.5">{b.subService}</p>
+                  </div>
+                ) : (
+                  <p className="text-gray-500">No service details</p>
+                )}
               </div>
               <span className={`text-xs px-3 py-1 rounded-full font-medium ${
                 b.status === "Completed" ? "bg-green-100 text-green-800" :
@@ -241,7 +318,7 @@ export default function MyBookings() {
             </div>
 
             <div className="mt-3 text-sm space-y-1 text-gray-700">
-              <p>📅 {b.date} • ⏰ {b.time}</p>
+              <p>📅 {b.date || "No date set"} • ⏰ {b.time || "No time set"}</p>
               <p>📍 {b.address?.slice(0, 60)}{b.address?.length > 60 ? '...' : ''}</p>
             </div>
 
@@ -281,6 +358,27 @@ export default function MyBookings() {
                 >
                   Cancel
                 </button>
+              </div>
+            )}
+
+            {/* COMPLAINT BUTTON FOR COMPLETED BOOKINGS */}
+            {b.status === "Completed" && !b.hasComplaint && (
+              <button
+                onClick={() => setComplaintBooking(b)}
+                className="w-full mt-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium"
+              >
+                ⚠️ File a Complaint
+              </button>
+            )}
+
+            {b.hasComplaint && (
+              <div className="w-full mt-4 p-3 bg-orange-50 rounded-xl border border-orange-200">
+                <p className="text-sm text-orange-800">
+                  ✓ Complaint registered on {new Date(b.complaintDate).toLocaleDateString()}
+                </p>
+                <p className="text-xs text-orange-700 mt-1">
+                  Our support team will contact you within 24 hours
+                </p>
               </div>
             )}
 
@@ -347,6 +445,71 @@ export default function MyBookings() {
               >
                 Yes, Cancel
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* COMPLAINT MODAL */}
+      {complaintBooking && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6 my-4">
+            <h3 className="text-xl font-bold mb-2">📝 File a Complaint</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Help us improve by telling us what went wrong
+            </p>
+
+            {/* COMPLAINT CATEGORY */}
+            <label className="block text-sm font-medium mb-2">Category</label>
+            <select
+              value={complaintCategory}
+              onChange={(e) => setComplaintCategory(e.target.value)}
+              className="w-full p-2 border rounded-lg mb-4 bg-white"
+            >
+              <option value="quality">Quality of Service</option>
+              <option value="behavior">Professional Behavior</option>
+              <option value="damage">Damage/Loss</option>
+              <option value="pricing">Pricing Issue</option>
+              <option value="other">Other</option>
+            </select>
+
+            {/* COMPLAINT TEXT */}
+            <label className="block text-sm font-medium mb-2">Description</label>
+            <textarea
+              value={complaintText}
+              onChange={(e) => setComplaintText(e.target.value)}
+              placeholder="Please describe your complaint in detail..."
+              className="w-full p-3 border rounded-lg mb-4 min-h-[100px] resize-none"
+            />
+
+            {/* BUTTONS */}
+            <button
+              onClick={submitComplaint}
+              className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-semibold mb-2"
+            >
+              Submit Complaint
+            </button>
+
+            <button
+              onClick={() => {
+                setComplaintBooking(null);
+                setComplaintText("");
+                setComplaintCategory("quality");
+              }}
+              className="w-full py-2 text-gray-600 hover:text-gray-800"
+            >
+              Close
+            </button>
+
+            {/* SUPPORT INFO */}
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 text-sm">
+              <p className="font-medium text-blue-900 mb-1">Need immediate help?</p>
+              <p className="text-blue-800">
+                Call us: <a href="tel:7661045308" className="font-semibold text-blue-600">7661045308</a>
+              </p>
+              <p className="text-blue-800 mt-1">
+                WhatsApp us: <a href="https://wa.me/917661045308?text=I%20have%20a%20complaint%20regarding%20my%20booking" target="_blank" rel="noreferrer" className="font-semibold text-blue-600">Chat here</a>
+              </p>
             </div>
           </div>
         </div>

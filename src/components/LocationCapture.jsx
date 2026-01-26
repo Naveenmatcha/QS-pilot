@@ -11,9 +11,9 @@ export default function LocationCapture({ onLocationDetected }) {
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const ampm = hours >= 12 ? "PM" : "AM";
-    const h12 = ((hours + 11) % 12) + 1;
+    const h12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
     const m = minutes.toString().padStart(2, "0");
-    return `${h12}:${m} ${ampm}`;
+    return `${h12.toString().padStart(2, "0")}:${m} ${ampm}`;
   };
 
   const handleConfirm = () => {
@@ -33,7 +33,18 @@ export default function LocationCapture({ onLocationDetected }) {
       setPostalError("Enter a valid postal code (3–12 characters)");
       return;
     }
-    const detectedTime = time || formatTimeTo12Hour(new Date());
+    let detectedTime = time;
+    
+    if (time) {
+      // Convert 24-hour format (HH:mm) to 12-hour format (HH:mm AM/PM)
+      const [hours, minutes] = time.split(":").map(Number);
+      const ampm = hours >= 12 ? "PM" : "AM";
+      const h12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+      detectedTime = `${h12.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")} ${ampm}`;
+    } else {
+      detectedTime = formatTimeTo12Hour(new Date());
+    }
+    
     setShowPostalModal(false);
     if (onLocationDetected) onLocationDetected({ address: address || "", latitude: null, longitude: null, time: detectedTime, postalCode: postalCode.trim() });
   };

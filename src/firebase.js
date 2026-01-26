@@ -1,36 +1,55 @@
-// Import the functions you need from the SDKs
 import { initializeApp } from "firebase/app";
-import * as firestore from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
-// Your web app's Firebase configuration
+// 🔍 DEBUG: Log all environment variables
+console.log("🔍 DEBUG: Environment Variables:");
+console.log("  VITE_FIREBASE_PROJECT_ID:", import.meta.env.VITE_FIREBASE_PROJECT_ID);
+console.log("  VITE_FIREBASE_API_KEY:", import.meta.env.VITE_FIREBASE_API_KEY?.substring(0, 20) + "...");
+console.log("  VITE_FIREBASE_AUTH_DOMAIN:", import.meta.env.VITE_FIREBASE_AUTH_DOMAIN);
+
 const firebaseConfig = {
-  apiKey: "AIzaSyDdwa6VCsJUqaxAjsZydVW52A9dntLMlxs",
-  authDomain: "quickseva-c0c49.firebaseapp.com",
-  projectId: "quickseva-c0c49",
-  storageBucket: "quickseva-c0c49.appspot.com",
-  messagingSenderId: "575202046802",
-  appId: "1:575202046802:web:ea429919908bbf5ddac08b",
-  measurementId: "G-DJRSQEGY5L",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// 🔍 CHECK IF CONFIG IS COMPLETE
+const missingKeys = Object.entries(firebaseConfig)
+  .filter(([_, value]) => !value)
+  .map(([key]) => key);
 
-// Runtime guard: some deployed/stale bundles call the global `getFirestore()`
-// (built from older code). Expose a safe wrapper on `window` so those
-// bundles don't throw `ReferenceError: getFirestore is not defined`.
-if (typeof window !== "undefined" && !window.getFirestore && firestore.getFirestore) {
-  // Keep signature compatible: getFirestore(app)
-  // eslint-disable-next-line no-undef
-  window.getFirestore = (appParam) => firestore.getFirestore(appParam);
+if (missingKeys.length > 0) {
+  console.error("❌ FIREBASE CONFIG ERROR: Missing environment variables:", missingKeys);
+  console.error("Make sure these are set in your .env file:");
+  missingKeys.forEach(key => console.error(`  - VITE_${key.toUpperCase()}`));
+} else {
+  console.log("✅ Firebase config is complete");
 }
 
-// ✅ Firestore (primary export used by the app)
-export const db = firestore.getFirestore(app);
+const app = initializeApp(firebaseConfig);
 
-// ✅ Auth (used in your app)
+export const db = getFirestore(app);
 export const auth = getAuth(app);
 
-// Export the initialized app in case other modules need it
-export { app };
+// 💾 Enable offline persistence
+enableIndexedDbPersistence(db)
+  .then(() => {
+    console.log("💾 Firestore offline persistence enabled");
+  })
+  .catch((err) => {
+    if (err.code === "failed-precondition") {
+      console.warn("⚠️ Offline persistence failed - multiple tabs open?");
+    } else if (err.code === "unimplemented") {
+      console.warn("⚠️ Offline persistence not supported in this browser");
+    } else {
+      console.warn("⚠️ Offline persistence error:", err.message);
+    }
+  });
+
+console.log("🔥 Firebase initialized with projectId:", firebaseConfig.projectId);
+
+

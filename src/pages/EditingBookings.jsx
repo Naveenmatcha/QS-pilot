@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 export default function EditingBookings() {
   const { id } = useParams();
@@ -13,43 +15,71 @@ export default function EditingBookings() {
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("bookings") || "[]");
-    const found = stored.find((b) => String(b.id) === id);
+    const fetchBooking = async () => {
+      try {
+        const docRef = doc(db, "bookings", id);
+        const docSnap = await getDoc(docRef);
 
-    if (!found) return;
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setBooking(data);
+          setDate(data.date || "");
 
-    setBooking(found);
-    setDate(found.date || "");
+          if (data.time) {
+            const [t, ap] = data.time.split(" ");
+            const [h, m] = t.split(":");
+            setHour(h.padStart(2, "0"));
+            setMinute(m);
+            setAmpm(ap);
+          }
 
-    if (found.time) {
-      const [t, ap] = found.time.split(" ");
-      const [h, m] = t.split(":");
-      setHour(h.padStart(2, "0"));
-      setMinute(m);
-      setAmpm(ap);
-    }
+          setAddress(data.address || "");
+          setPhone(data.phone || "");
+          setNotes(data.notes || "");
+        }
+      } catch (err) {
+        console.error("Error fetching booking:", err);
+        alert("Failed to load booking");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setAddress(found.address || "");
-    setPhone(found.phone || "");
-    setNotes(found.notes || "");
+    fetchBooking();
   }, [id]);
 
-  if (!booking) return <p className="p-4">Loading...</p>;
+  if (loading) return <p className="p-4">Loading...</p>;
+  if (!booking) return <p className="p-4">Booking not found</p>;
 
-  const saveChanges = () => {
-    const finalTime = `${hour}:${minute} ${ampm}`;
-    const stored = JSON.parse(localStorage.getItem("bookings") || "[]");
+  const saveChanges = async () => {
+    if (!date || !hour || !minute) {
+      alert("Please fill in all required fields");
+      return;
+    }
 
-    const updated = stored.map((b) =>
-      b.id === booking.id
-        ? { ...b, date, time: finalTime, address, phone, notes }
-        : b
-    );
+    const finalTime = `${hour.padStart(2, "0")}:${minute} ${ampm}`;
 
-    localStorage.setItem("bookings", JSON.stringify(updated));
-    nav("/booking");
+    try {
+      const docRef = doc(db, "bookings", id);
+      await updateDoc(docRef, {
+        date,
+        time: finalTime,
+        address: address.trim(),
+        phone: phone.trim(),
+        notes: notes.trim(),
+        lastModifiedAt: new Date().toISOString(),
+        modificationRequested: true,
+      });
+
+      alert("Changes saved! Our team will review and confirm shortly.");
+      nav("/my");
+    } catch (err) {
+      console.error("Error saving changes:", err);
+      alert("Failed to save changes");
+    }
   };
 
   return (

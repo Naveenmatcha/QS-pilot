@@ -5,6 +5,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Booking from "./pages/Booking.jsx";
 import BookingSuccess from "./pages/BookingSuccess.jsx";
+import CartScreen from "./pages/CartScreen.jsx";
 import MyBookings from "./pages/MyBookings.jsx";
 import Profile from "./pages/Profile.jsx";
 import LiveTracking from "./pages/LiveTracking.jsx";
@@ -37,99 +38,123 @@ import ElectricianPlumber from "./pages/Services/ElectricianPlumber.jsx";
 import Plumber from "./pages/Services/Plumber.jsx";
 import Washing from "./pages/Services/Washing.jsx";
 import Frigde from "./pages/Services/Frigde.jsx";
+
 /* ================= UTILS ================= */
 import { initTechnicians } from "./utils/initTechnicians";
 import AdminLogin from "./pages/AdminLogin.jsx";
 
+/* ================= CART ================= */
+// ✅ CORRECT PATH
+import { CartProvider } from "./utils/CartContext.jsx";
+
 export default function App() {
-  // Initialize mock technicians (local pilot support)
   useEffect(() => {
     initTechnicians();
   }, []);
 
   return (
-    <Routes>
-      {/* ================= PUBLIC ================= */}
-      <Route path="/" element={<Home />} />
+    <CartProvider>
+      <Routes>
+        {/* ================= PUBLIC ================= */}
+        <Route path="/" element={<Home />} />
 
-      {/* Auth (both routes supported to avoid errors) */}
-      <Route path="/login" element={<PhoneLogin />} />
-      <Route path="/phone-login" element={<PhoneLogin />} />
-      <Route path="/otp" element={<OtpVerify />} />
+        {/* Auth */}
+        <Route path="/login" element={<PhoneLogin />} />
+        <Route path="/phone-login" element={<PhoneLogin />} />
+        <Route path="/otp" element={<OtpVerify />} />
 
-      {/* ================= USER (PROTECTED) ================= */}
-      <Route
-        path="/booking"
-        element={
-          <ProtectedRoute>
-            <Booking />
-          </ProtectedRoute>
-        }
-      />
+        {/* ================= USER (PROTECTED) ================= */}
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <CartScreen />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/booking-success"
-        element={
-          <ProtectedRoute>
-            <BookingSuccess />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/booking"
+          element={
+            <ProtectedRoute>
+              <Booking />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/my"
-        element={
-          <ProtectedRoute>
-            <MyBookings />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/booking-success"
+          element={
+            <ProtectedRoute>
+              <BookingSuccess />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/my"
+          element={
+            <ProtectedRoute>
+              <MyBookings />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Live Technician Tracking */}
-      <Route
-        path="/track/:bookingId"
-        element={
-          <ProtectedRoute>
-            <LiveTracking />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/tech/onway/:bookingId" element={<TechOnWay />} />
-<Route path="/tech/start/:bookingId" element={<TechStart />} />
-<Route path="/tech/done/:bookingId" element={<TechDone />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* ================= ADMIN ================= */}
-      <Route path="/admin" element={<AdminDashboardLocal />} />
-<Route path="/admin-login" element={<AdminLogin />} />
+        {/* ================= LIVE TRACKING ================= */}
+        <Route
+          path="/track/:bookingId"
+          element={
+            <ProtectedRoute>
+              <LiveTracking />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* ================= TECHNICIAN ================= */}
-      <Route path="/tech-login" element={<TechnicianLogin />} />
-      <Route path="/tech" element={<TechnicianDashboard />} />
+        <Route path="/tech/onway/:bookingId" element={<TechOnWay />} />
+        <Route path="/tech/start/:bookingId" element={<TechStart />} />
+        <Route path="/tech/done/:bookingId" element={<TechDone />} />
 
-      {/* ================= SERVICES ================= */}
-  {    /*<Route path="/cooking" element={<CookingDetails />} />*/}
-      <Route path="/bike" element={<BikeCarService />} />
-      <Route path="/beauty" element={<BeautySalon />} />
-      <Route path="/decoration" element={<DecorationDetails />} />
-      <Route path="/carpenter" element={<CarpenterDetails />} />
-      <Route path="/ac" element={<ACAppliances />} />
-      <Route path="/electrician-plumber" element={<ElectricianPlumber />} />
-       <Route path="/plumber" element={<Plumber />} />
-       <Route path="/washing-machine"  element={<Washing/>}/>
-       <Route path="/refrigerator" element={<Frigde/>}/>
-       <Route path="/service-detail" element={<ServiceDetail/>}/>
-     { /*<Route path="/clean" element={<CleaningPestControl />} />*/}
-     <Route path="/tech/accept/:bookingId" element={<TechAccept />} />
-     <Route path="/tech/decline/:bookingId" element={<TechDecline />} />
-    </Routes >
+        {/* ================= ADMIN ================= */}
+        <Route path="/admin" element={<AdminDashboardLocal />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
+
+        {/* ================= TECHNICIAN ================= */}
+        <Route path="/tech-login" element={<TechnicianLogin />} />
+        <Route path="/tech" element={<TechnicianDashboard />} />
+
+        {/* ================= SERVICES ================= */}
+        <Route path="/bike" element={<BikeCarService />} />
+        <Route path="/beauty" element={<BeautySalon />} />
+        <Route path="/decoration" element={<DecorationDetails />} />
+        <Route path="/carpenter" element={<CarpenterDetails />} />
+        <Route path="/ac" element={<ACAppliances />} />
+        <Route
+          path="/electrician-plumber"
+          element={<ElectricianPlumber />}
+        />
+        <Route path="/plumber" element={<Plumber />} />
+        <Route path="/washing-machine" element={<Washing />} />
+        <Route path="/refrigerator" element={<Frigde />} />
+        <Route path="/service-detail" element={<ServiceDetail />} />
+
+        <Route
+          path="/tech/accept/:bookingId"
+          element={<TechAccept />}
+        />
+        <Route
+          path="/tech/decline/:bookingId"
+          element={<TechDecline />}
+        />
+      </Routes>
+    </CartProvider>
   );
 }
